@@ -1,4 +1,8 @@
-//Test Load
+//TA Questions
+//Received an security email - how to update package.json to remove threat
+//Code Errors
+
+//Test Page Load
 console.log("load bamazonCustomer.js");
 
 //Require NPM Packages
@@ -20,23 +24,86 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
 	console.log("connection working")
   if (err) {
-    console.error("error connecting:" + err.stack);
+    console.error("error connecting");
   }
   productInventory();
 });
 
-//Product table from DB
-function productInventory (){
-	connection.query("SELECT * FROM products", function (err,res) {
+//Load Product List from MySQL DB
+var productInventory = function (){
+	console.log("CHOOSE FROM THE MOST VALUABLE RECORDS OF ALL TIME!!!")
+	console.log(" ITEM ID |  Record Name |  Department Name |  Price  | Stock Quantity" )
+	connection.query("SELECT * FROM products", function (err, res) {
 		for(var i =0; i < res.length; i++) {
 			console.log(
  				res[i].item_id + "|" + 
  				res[i].product_name + "|" + 
- 				res[i].department_name + 
- 				res[i].price + "|" + 
- 				res[i].stock_quantity);
-				 console.log("____________________________"
-			);
-	}
-})
-}
+ 				res[i].department_name + "|" +
+ 				"$" + res[i].price + "|" + 
+ 				res[i].stock_quantity) + "|" +
+	console.log("____________________________________________________________________________________");
+		}
+
+	userPurchase(res);
+
+	})
+};
+
+//User Input Promts to Purchase Items
+var userPurchase = function(res){
+	inquirer.prompt([
+	{	
+      name: "itemID",
+      type: "input",
+	  message: "What is the item ID of the item you like to purchase?"
+    },
+    {
+      name: "Quantity",
+      type: "input",
+      message: "How many units would you like to purchase?"
+	}])
+	.then(function(answer){
+		connection.query("SELECT * FROM products WHERE products.item_id = ?",
+			[answer.item_id], function(err, res) {
+				console.log (res[0].item_id);
+				console.log(res [0].stock_quantity)
+
+//Check for Item in Stock				
+	if (res[0].item_id == answer.itemID && res[0].stock_quantity >= parseInt(answer.Quantity)) {
+
+//Finalize Puchase and Total Price
+      var TotalPrice = res[0].price * parseInt(answer.Quantity);
+      console.log("Successful purchase" + quantity + " " + product.product_name);
+      console.log("Your Total Purchase Cost: $" + TotalPrice);
+
+      connection.query(
+        "UPDATE products SET ? WHERE ?",
+        [
+          {
+            stock_quantity:
+              res[0].stock_quantity - parseInt(answer.Quantity)
+          },
+          {
+            item_id: res[0].itemID
+          }
+        ],
+        function(err, res) {
+          setTimeout(productInventory, 1000);
+
+          setTimeout(function() {
+            console.log("Your Total Purchase Cost: $" + TotalPrice);
+          }, 2500);
+        }
+      );
+    } else if (res[0].item_id == answer.itemID && res[0].stock_quantity < parseInt(answer.Quantity)) {
+      setTimeout(function() {
+        console.log("We do not have the quanity you requested!");
+      }, 2500);
+      productInventory();
+    }
+
+
+		})
+	})
+};
+
