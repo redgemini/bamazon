@@ -31,7 +31,7 @@ connection.connect(function(err) {
 
 //Load Product List from MySQL DB
 var productInventory = function (){
-	console.log("CHOOSE FROM THE MOST VALUABLE RECORDS OF ALL TIME!!!")
+	console.log("\n\nCHOOSE FROM THE MOST VALUABLE RECORDS OF ALL TIME!!!")
 	console.log(" ITEM ID |  Record Name |  Department Name |  Price  | Stock Quantity" )
 	connection.query("SELECT * FROM products", function (err, res) {
 		for(var i =0; i < res.length; i++) {
@@ -41,7 +41,7 @@ var productInventory = function (){
  				res[i].department_name + "|" +
  				"$" + res[i].price + "|" + 
  				res[i].stock_quantity) + "|" +
-	console.log("____________________________________________________________________________________");
+	console.log("____________________________________________________________________________________\n");
 		}
 
 	userPurchase(res);
@@ -53,7 +53,7 @@ var productInventory = function (){
 var userPurchase = function(res){
 	inquirer.prompt([
 	{	
-      name: "itemID",
+      name: "item_id",
       type: "input",
 	  message: "What is the item ID of the item you like to purchase?"
     },
@@ -66,14 +66,14 @@ var userPurchase = function(res){
 		connection.query("SELECT * FROM products WHERE products.item_id = ?",
 			[answer.item_id], function(err, res) {
 				console.log (res[0].item_id);
-				console.log(res [0].stock_quantity)
+				console.log(res[0].stock_quantity);
 
 //Check for Item in Stock				
-	if (res[0].item_id == answer.itemID && res[0].stock_quantity >= parseInt(answer.Quantity)) {
+	if (res[0].item_id == answer.item_id && res[0].stock_quantity >= parseInt(answer.Quantity)) {
 
 //Finalize Puchase and Total Price
       var TotalPrice = res[0].price * parseInt(answer.Quantity);
-      console.log("Successful purchase" + quantity + " " + product.product_name);
+      console.log("Successful purchase of " + answer.Quantity + " " + res[0].product_name);
       console.log("Your Total Purchase Cost: $" + TotalPrice);
 
       connection.query(
@@ -84,18 +84,19 @@ var userPurchase = function(res){
               res[0].stock_quantity - parseInt(answer.Quantity)
           },
           {
-            item_id: res[0].itemID
+            item_id: res[0].item_id
           }
         ],
         function(err, res) {
-          setTimeout(productInventory, 1000);
+     
 
           setTimeout(function() {
             console.log("Your Total Purchase Cost: $" + TotalPrice);
-          }, 2500);
+		  }, 2500);
+		setTimeout(productInventory, 1000);
         }
       );
-    } else if (res[0].item_id == answer.itemID && res[0].stock_quantity < parseInt(answer.Quantity)) {
+    } else if (res[0].item_id == answer.item_id && res[0].stock_quantity < parseInt(answer.Quantity)) {
       setTimeout(function() {
         console.log("We do not have the quanity you requested!");
       }, 2500);
@@ -104,6 +105,10 @@ var userPurchase = function(res){
 
 
 		})
-	})
+	});
+
+	
+
+
 };
 
